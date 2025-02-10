@@ -1,10 +1,10 @@
-import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import '../model/notification_sevice.dart';
-
+import 'package:local_auth/local_auth.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import 'package:new_todo/view/Notification.dart';
+import 'package:new_todo/view/loginpage.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -12,123 +12,141 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final LocalAuthentication _localAuth = LocalAuthentication();
   final TextEditingController titleController = TextEditingController();
   DateTime? selectedDateTime;
-  final NotificationService _notificationService = NotificationService();
+
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
   void initState() {
     super.initState();
-    _notificationService.initNotification();
+    _authenticateWithBiometrics();
+
+    // Add biometric authentication on app start
   }
 
-  Future<void> _selectDateTime() async {
-    DateTime? selectedDate = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2101),
-    );
-    if (selectedDate != null) {
-      TimeOfDay? selectedTime = await showTimePicker(
-        context: context,
-        initialTime: TimeOfDay.now(),
-      );
-      if (selectedTime != null) {
-        setState(() {
-          selectedDateTime = DateTime(
-            selectedDate.year,
-            selectedDate.month,
-            selectedDate.day,
-            selectedTime.hour,
-            selectedTime.minute,
+  Future<void> _authenticateWithBiometrics() async {
+    try {
+      bool canCheckBiometrics = await _localAuth.canCheckBiometrics;
+      if (canCheckBiometrics) {
+        bool authenticated = await _localAuth.authenticate(
+          localizedReason: 'Use your fingerprint to unlock the app',
+          options: const AuthenticationOptions(
+            biometricOnly: true,
+            stickyAuth: true,
+          ),
+        );
+        if (!authenticated) {
+          // Handle if authentication fails
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Biometric authentication failed.'),
+              backgroundColor: Colors.red,
+            ),
           );
-        });
+        }
       }
+    } catch (e) {
+      print("Biometric authentication error: $e");
     }
-  }
-
-  Future<void> _scheduleNotification() async {
-    if (selectedDateTime == null || titleController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Please select a date, time, and enter a title.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    int notificationId = DateTime.now().millisecondsSinceEpoch.remainder(100000);
-    await _notificationService.scheduleNotification(
-      id: notificationId,
-      scheduledTime: selectedDateTime!,
-      title: titleController.text,
-    );
-
-    // Save notification details to Firestore
-    final user = _auth.currentUser;
-    if (user != null) {
-      await _firestore.collection('notifications').add({
-        'userId': user.uid,
-        'title': titleController.text,
-        'scheduledTime': selectedDateTime!.toIso8601String(),
-        'notificationId': notificationId,
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Notification scheduled successfully!'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    }
-
-    // Reset fields
-    setState(() {
-      selectedDateTime = null;
-      titleController.clear();
-    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Schedule Notification')),
+      appBar: AppBar(
+        title: Text('TODO'),
+        automaticallyImplyLeading: false,
+        centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text('Logout'),
+                    content: Text('Confirm Logout'),
+                    actions: [
+                      TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: Text('Cancel')),
+                      TextButton(
+                          onPressed: () {
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => Loginpage(),
+                              ),
+                              (route) => false,
+                            );
+                          },
+                          child: Text('Logout')),
+                    ],
+                  );
+                },
+              );
+            },
+            icon: Icon(Icons.logout),
+          ),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TextField(
-              controller: titleController,
-              decoration: InputDecoration(
-                labelText: 'Notification Title',
-                border: OutlineInputBorder(),
+            Expanded(
+              child: GridView.count(
+                crossAxisCount: 2,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                children: [
+                  _buildClickableCard(
+                    context,
+                    LucideIcons.bell,
+                    "Notifications",
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => Shedule_Notification()),
+                    ),
+                  ),
+                ],
               ),
             ),
-            SizedBox(height: 20),
-            Text(
-              selectedDateTime == null
-                  ? 'No Date Selected'
-                  : 'Selected: ${DateFormat('yyyy-MM-dd HH:mm').format(selectedDateTime!)}',
-              style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton.icon(
-              onPressed: _selectDateTime,
-              icon: Icon(Icons.calendar_today),
-              label: Text('Select Date and Time'),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton.icon(
-              onPressed: _scheduleNotification,
-              icon: Icon(Icons.notifications_active),
-              label: Text('Schedule Notification'),
-            ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildClickableCard(
+    BuildContext context,
+    IconData iconData,
+    String title,
+    VoidCallback onTap,
+  ) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        elevation: 4,
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(iconData, size: 40, color: Colors.deepPurple),
+              const SizedBox(height: 8),
+              Text(
+                title,
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
         ),
       ),
     );

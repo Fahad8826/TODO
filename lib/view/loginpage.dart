@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:new_todo/view/signup.dart';
 import 'package:new_todo/view/userhomepage.dart';
 
 class Loginpage extends StatefulWidget {
@@ -20,6 +21,7 @@ class _LoginpageState extends State<Loginpage> {
         appBar: AppBar(
           title: Text('Sign In'),
           centerTitle: true,
+          automaticallyImplyLeading: false,
         ),
         body: Padding(
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
@@ -31,7 +33,7 @@ class _LoginpageState extends State<Loginpage> {
                 decoration: InputDecoration(
                     label: Text('email'),
                     border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(22))),
+                        borderRadius: BorderRadius.circular(12))),
               ),
               SizedBox(
                 height: 10,
@@ -42,7 +44,7 @@ class _LoginpageState extends State<Loginpage> {
                 decoration: InputDecoration(
                     label: Text('Password'),
                     border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(22))),
+                        borderRadius: BorderRadius.circular(12))),
               ),
               SizedBox(
                 height: 10,
@@ -56,11 +58,20 @@ class _LoginpageState extends State<Loginpage> {
                   backgroundColor: Colors.blue, // Text color
                   elevation: 2, // Elevation
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(22), // Rounded corners
+                    borderRadius: BorderRadius.circular(12), // Rounded corners
                   ),
                 ),
                 child: Text('Sign In'),
-              )
+              ),
+              TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SignUpPage(),
+                        ));
+                  },
+                  child: Text("if don't have an account   SignUP"))
             ],
           ),
         ));
@@ -87,8 +98,7 @@ class _LoginpageState extends State<Loginpage> {
         content: Text('Error :${e.toString()}'),
       ));
     }
-  }  
+  }
 
   //signUP
-  
 }
