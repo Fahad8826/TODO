@@ -1,9 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:local_auth/local_auth.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:new_todo/view/Notification.dart';
+import 'package:new_todo/view/Phonenumber.dart';
 import 'package:new_todo/view/loginpage.dart';
 
 class HomePage extends StatefulWidget {
@@ -12,47 +11,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final LocalAuthentication _localAuth = LocalAuthentication();
   final TextEditingController titleController = TextEditingController();
   DateTime? selectedDateTime;
-
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-  @override
-  void initState() {
-    super.initState();
-    _authenticateWithBiometrics();
-
-    // Add biometric authentication on app start
-  }
-
-  Future<void> _authenticateWithBiometrics() async {
-    try {
-      bool canCheckBiometrics = await _localAuth.canCheckBiometrics;
-      if (canCheckBiometrics) {
-        bool authenticated = await _localAuth.authenticate(
-          localizedReason: 'Use your fingerprint to unlock the app',
-          options: const AuthenticationOptions(
-            biometricOnly: true,
-            stickyAuth: true,
-          ),
-        );
-        if (!authenticated) {
-          // Handle if authentication fails
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Biometric authentication failed.'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      print("Biometric authentication error: $e");
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -76,7 +36,8 @@ class _HomePageState extends State<HomePage> {
                           },
                           child: Text('Cancel')),
                       TextButton(
-                          onPressed: () {
+                          onPressed: () async {
+                            await FirebaseAuth.instance.signOut();
                             Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(

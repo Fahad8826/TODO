@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:new_todo/view/Phonenumber.dart';
 import 'package:new_todo/view/signup.dart';
 import 'package:new_todo/view/userhomepage.dart';
 
@@ -63,6 +64,18 @@ class _LoginpageState extends State<Loginpage> {
                 ),
                 child: Text('Sign In'),
               ),
+              Text(
+                  '------------------------------------------------------------------'),
+              Text('OR'),
+              ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PhoneAuthScreen(),
+                        ));
+                  },
+                  child: Text('Login with Phone number')),
               TextButton(
                   onPressed: () {
                     Navigator.push(
@@ -100,5 +113,4 @@ class _LoginpageState extends State<Loginpage> {
     }
   }
 
-  //signUP
 }

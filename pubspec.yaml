@@ -43,6 +43,7 @@ dependencies:
   local_auth: ^2.3.0
   shared_preferences: ^2.5.1
   lucide_icons: ^0.257.0
+  pinput: ^3.0.1
 
 dev_dependencies:
   flutter_test:
