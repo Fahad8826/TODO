@@ -1,7 +1,3 @@
-// First, ensure you have these dependencies in pubspec.yaml:
-// firebase_core: ^2.24.2
-// firebase_auth: ^4.15.3
-// pinput: ^3.0.1
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';

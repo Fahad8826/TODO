@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:new_todo/view/AuthenticatedHomePage.dart';
-import 'package:new_todo/view/loginpage.dart';
+import 'package:new_todo/model/Biometric.dart';
+import 'package:new_todo/view/loginPage.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);

@@ -1,9 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:new_todo/view/Notification.dart';
-import 'package:new_todo/view/Phonenumber.dart';
-import 'package:new_todo/view/loginpage.dart';
+import 'package:new_todo/view/NotificationPage.dart';
+
+import 'package:new_todo/view/loginPage.dart';
 
 class HomePage extends StatefulWidget {
   @override
