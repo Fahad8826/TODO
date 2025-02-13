@@ -1,21 +1,18 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../model/notification_sevice.dart';
 
-
-class Shedule_Notification extends StatefulWidget {
-  const Shedule_Notification({super.key});
+class SheduleTask extends StatefulWidget {
+  const SheduleTask({super.key});
 
   @override
   // ignore: library_private_types_in_public_api
-  _Shedule_NotificationState createState() => _Shedule_NotificationState();
+  _SheduleTaskState createState() => _SheduleTaskState();
 }
 
-class _Shedule_NotificationState extends State<Shedule_Notification> {
-
+class _SheduleTaskState extends State<SheduleTask> {
   final TextEditingController titleController = TextEditingController();
   DateTime? selectedDateTime;
   final NotificationService _notificationService = NotificationService();
@@ -57,7 +54,7 @@ class _Shedule_NotificationState extends State<Shedule_Notification> {
     }
   }
 
-  Future<void> _scheduleNotification() async {
+  Future<void> _Shedule_Task() async {
     if (selectedDateTime == null || titleController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -105,7 +102,7 @@ class _Shedule_NotificationState extends State<Shedule_Notification> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Shedule Notification'),
+        title: Text('Shedule Task'),
         automaticallyImplyLeading: false,
         centerTitle: true,
       ),
@@ -149,9 +146,9 @@ class _Shedule_NotificationState extends State<Shedule_Notification> {
                     ),
                     SizedBox(height: 20),
                     ElevatedButton.icon(
-                      onPressed: _scheduleNotification,
+                      onPressed: _Shedule_Task,
                       icon: Icon(Icons.notifications_active),
-                      label: Text('Schedule Notification'),
+                      label: Text('Shedule Task'),
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12)),
