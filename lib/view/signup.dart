@@ -166,6 +166,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:new_todo/view/dummyhomepage.dart';
 import 'package:new_todo/view/loginPage.dart';
 import 'userhomepage.dart';
 
@@ -211,7 +212,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => HomePage()),
+          MaterialPageRoute(builder: (context) => Dummyhomepage()),
         );
 
         ScaffoldMessenger.of(context).showSnackBar(

@@ -1,5 +1,4 @@
 import 'dart:ui';
-
 import 'package:awesome_notifications/awesome_notifications.dart';
 
 class NotificationService {
@@ -55,5 +54,23 @@ class NotificationService {
         allowWhileIdle: true,
       ),
     );
+  }
+
+  // Cancel a specific notification by ID
+  Future<void> cancelNotification(int id) async {
+    await AwesomeNotifications().cancel(id);
+  }
+
+  // Cancel all scheduled notifications
+  Future<void> cancelAllNotifications() async {
+    await AwesomeNotifications().cancelAll();
+  }
+
+  // Check if a specific notification exists
+  Future<bool> checkIfNotificationExists(int id) async {
+    final List<NotificationModel> activeSchedules =
+        await AwesomeNotifications().listScheduledNotifications();
+    return activeSchedules
+        .any((notification) => notification.content?.id == id);
   }
 }
