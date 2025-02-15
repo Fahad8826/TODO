@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:new_todo/view/TextSheduler.dart';
 import 'package:new_todo/view/dummyhomepage.dart';
 import 'package:new_todo/view/loginPage.dart';
 import 'package:new_todo/view/userhomepage.dart';
@@ -30,7 +31,7 @@ class _BiometricState extends State<Biometric> {
             if (isAuthenticated) {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => Dummyhomepage()),
+                MaterialPageRoute(builder: (context) => SheduleTask()),
               );
             } else {
               Navigator.pushReplacement(
@@ -67,7 +68,7 @@ class _BiometricState extends State<Biometric> {
           if (context.mounted) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => Dummyhomepage()),
+              MaterialPageRoute(builder: (context) => SheduleTask()),
             );
           }
         } else {

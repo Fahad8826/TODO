@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 import 'package:new_todo/model/notification_sevice.dart';
 import 'package:new_todo/view/TextSheduler.dart';
 import 'package:new_todo/view/loginPage.dart';
-import 'package:new_todo/view/userhomepage.dart';
 
 class Dummyhomepage extends StatefulWidget {
   const Dummyhomepage({super.key});
@@ -22,17 +21,36 @@ class _DummyhomepageState extends State<Dummyhomepage> {
 
   @override
   Widget build(BuildContext context) {
-    const Color sandColor =
-        Color.fromARGB(255, 236, 212, 180); // Light sand color
+    const Color sandColor = Color.fromARGB(255, 237, 237, 205);
+    const Color button = Color.fromARGB(255, 0, 0, 0);
 
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 80.0,
         backgroundColor: sandColor,
-        elevation: 0,
         leading: const Padding(
           padding: EdgeInsets.only(left: 16.0),
-          child: Icon(Icons.person, size: 30, color: Colors.brown),
+          child: Icon(Icons.person, size: 30, color: button),
+        ),
+        title: FutureBuilder<DocumentSnapshot>(
+          future: FirebaseFirestore.instance
+              .collection('Users')
+              .doc(FirebaseAuth.instance.currentUser?.uid)
+              .get(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Text("Loading...");
+            }
+            if (!snapshot.hasData || !snapshot.data!.exists) {
+              return const Text("User not found");
+            }
+
+            final userData = snapshot.data!.data() as Map<String, dynamic>;
+            return Text(
+              "Hi, ${userData['username'] ?? 'User'}!",
+              style: const TextStyle(fontSize: 17),
+            );
+          },
         ),
         actions: [
           Padding(
@@ -69,10 +87,7 @@ class _DummyhomepageState extends State<Dummyhomepage> {
                   },
                 );
               },
-              icon: const Icon(
-                Icons.logout,
-                color: Colors.brown,
-              ),
+              icon: const Icon(Icons.logout, color: button),
             ),
           ),
         ],
@@ -89,20 +104,21 @@ class _DummyhomepageState extends State<Dummyhomepage> {
                 controller: _searchController,
                 decoration: InputDecoration(
                   hintText: 'Search',
-                  prefixIcon: const Icon(Icons.search, color: Colors.brown),
+                  prefixIcon: const Icon(Icons.search, color: button),
                   fillColor: Colors.white,
                   filled: true,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(20.0),
-                    borderSide: BorderSide.none,
                   ),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 12.0),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 11.0),
                 ),
                 onChanged: (value) {
-                  setState(() {}); // Update UI when search input changes
+                  setState(() {});
                 },
               ),
             ),
+
+            const SizedBox(height: 10),
 
             // Firestore Notifications List
             Expanded(
@@ -126,27 +142,28 @@ class _DummyhomepageState extends State<Dummyhomepage> {
                   }
 
                   if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    return Center(
+                    return const Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
+                        children: [
                           Icon(Icons.notifications_none,
                               size: 64, color: Colors.grey),
                           SizedBox(height: 16),
-                          Text(
-                            'No tasks scheduled',
-                            style: TextStyle(fontSize: 18, color: Colors.grey),
-                          ),
+                          Text('No tasks scheduled',
+                              style:
+                                  TextStyle(fontSize: 18, color: Colors.grey)),
                         ],
                       ),
                     );
                   }
 
+                  final searchQuery = _searchController.text.toLowerCase();
                   final filteredDocs = snapshot.data!.docs.where((doc) {
                     final data = doc.data() as Map<String, dynamic>;
-                    final title = data['title'].toString().toLowerCase();
-                    final searchQuery = _searchController.text.toLowerCase();
-                    return title.contains(searchQuery);
+                    return data['title']
+                        .toString()
+                        .toLowerCase()
+                        .contains(searchQuery);
                   }).toList();
 
                   return ListView.builder(
@@ -159,40 +176,133 @@ class _DummyhomepageState extends State<Dummyhomepage> {
                       final bool isPast =
                           scheduledTime.isBefore(DateTime.now());
 
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        color: isPast ? Colors.grey[100] : null,
-                        child: ListTile(
-                          title: Text(
-                            data['title'],
-                            style: TextStyle(
-                                decoration:
-                                    isPast ? TextDecoration.lineThrough : null),
-                          ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                DateFormat('MMM dd, yyyy - HH:mm')
-                                    .format(scheduledTime),
-                                style: TextStyle(
-                                    color:
-                                        isPast ? Colors.grey : Colors.black54),
-                              ),
-                              if (isPast)
-                                const Text(
-                                  'Past due',
-                                  style: TextStyle(
-                                      color: Color.fromARGB(255, 160, 128, 87),
-                                      fontSize: 12),
+                      return Container(
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.1),
+                              spreadRadius: 1,
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () {},
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 10),
+                                child: Row(
+                                  children: [
+                                    // Status indicator
+                                    Container(
+                                      width: 3,
+                                      height: 40,
+                                      decoration: BoxDecoration(
+                                        color: isPast
+                                            ? Colors.red.withOpacity(0.7)
+                                            : Colors.green.withOpacity(0.7),
+                                        borderRadius:
+                                            BorderRadius.circular(1.5),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    // Content
+                                    Expanded(
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            data['title'],
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500,
+                                              decoration: isPast
+                                                  ? TextDecoration.lineThrough
+                                                  : null,
+                                              color: isPast
+                                                  ? Colors.grey
+                                                  : Colors.black87,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Row(
+                                            children: [
+                                              Icon(
+                                                Icons.access_time,
+                                                size: 14,
+                                                color: isPast
+                                                    ? Colors.grey
+                                                    : Colors.black54,
+                                              ),
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                DateFormat('MMM dd, HH:mm')
+                                                    .format(scheduledTime),
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  color: isPast
+                                                      ? Colors.grey
+                                                      : Colors.black54,
+                                                ),
+                                              ),
+                                              if (isPast) ...[
+                                                const SizedBox(width: 8),
+                                                Icon(
+                                                  Icons.warning_rounded,
+                                                  size: 12,
+                                                  color: Colors.red
+                                                      .withOpacity(0.8),
+                                                ),
+                                                const SizedBox(width: 2),
+                                                Text(
+                                                  'Past due',
+                                                  style: TextStyle(
+                                                    fontSize: 11,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: Colors.red
+                                                        .withOpacity(0.8),
+                                                  ),
+                                                ),
+                                              ],
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    // Delete button
+                                    Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        borderRadius: BorderRadius.circular(50),
+                                        onTap: () => deleteTask(
+                                            doc.id, data['notificationId']),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(6.0),
+                                          child: Icon(
+                                            Icons.delete_outline_rounded,
+                                            color: Colors.red.withOpacity(0.7),
+                                            size: 20,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                            ],
-                          ),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.delete,
-                                color: Color.fromARGB(255, 160, 128, 87)),
-                            onPressed: () =>
-                                deleteTask(doc.id, data['notificationId']),
+                              ),
+                            ),
                           ),
                         ),
                       );
@@ -201,28 +311,23 @@ class _DummyhomepageState extends State<Dummyhomepage> {
                 },
               ),
             ),
-           
           ],
         ),
       ),
-    
-      // Floating Action Button
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => SheduleTask(),
-              ));
-        },
-        backgroundColor: Colors.brown,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => SheduleTask()));
+          },
+          backgroundColor: button,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          child: const Icon(Icons.add, size: 30, color: Colors.white),
         ),
-        child: const Icon(Icons.add, size: 30, color: Colors.white),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      
     );
   }
 
@@ -230,18 +335,13 @@ class _DummyhomepageState extends State<Dummyhomepage> {
     try {
       await _firestore.collection('notifications').doc(docId).delete();
       await _notificationService.cancelNotification(notificationId);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Task deleted successfully'),
-            backgroundColor: Colors.green),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Task deleted successfully'),
+          backgroundColor: Colors.green));
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text('Failed to delete task: $e'),
-            backgroundColor: Colors.red),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Failed to delete task: $e'),
+          backgroundColor: Colors.red));
     }
   }
 }
